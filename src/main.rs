@@ -1,40 +1,45 @@
-use sdl3::pixels::Color;
 use sdl3::event::Event;
 use sdl3::keyboard::Keycode;
-use std::time::Duration;
+use sdl3::pixels::Color;
+use sdl3::rect::Point;
 
-pub fn main() {
-    let sdl_context = sdl3::init().unwrap();
-    let video_subsystem = sdl_context.video().unwrap();
+use render_from_scratch::Vertex;
 
-    let window = video_subsystem.window("rust-sdl3 demo", 800, 600)
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let sdl_context = sdl3::init()?;
+    let video = sdl_context.video()?;
+
+    let window = video
+        .window("Vertex Renderer", 800, 600)
         .position_centered()
-        .build()
-        .unwrap();
+        .build()?; 
 
     let mut canvas = window.into_canvas();
 
-    canvas.set_draw_color(Color::RGB(0, 255, 255));
-    canvas.clear();
-    canvas.present();
-    let mut event_pump = sdl_context.event_pump().unwrap();
-    let mut i = 0;
+    let mut event_pump = sdl_context.event_pump()?;
+
+    let vertex = Vertex::new(400.0, 300.0);
+
     'running: loop {
-        i = (i + 1) % 255;
-        canvas.set_draw_color(Color::RGB(i, 64, 255 - i));
-        canvas.clear();
         for event in event_pump.poll_iter() {
             match event {
-                Event::Quit {..} |
-                Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
-                    break 'running
-                },
+                Event::Quit { .. }
+                | Event::KeyDown {
+                    keycode: Some(Keycode::Escape),
+                    ..
+                } => break 'running,
                 _ => {}
             }
         }
-        // The rest of the game loop goes here...
+
+        canvas.set_draw_color(Color::RGB(0, 0, 0));
+        canvas.clear();
+
+        canvas.set_draw_color(Color::RGB(255, 255, 255));
+        canvas.draw_point(Point::new(vertex.x as i32, vertex.y as i32))?;
 
         canvas.present();
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
+
+    Ok(())
 }
