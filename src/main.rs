@@ -10,18 +10,17 @@ use render_from_scratch::Vertex;
 fn draw_vertex(
     canvas: &mut Canvas<Window>,
     v: Vertex,
-    size: i32,
+    radius: i32,
 ) -> Result<(), sdl3::Error> {
     let (x, y) = v.to_point();
-
-    let rect = Rect::new(
-        x - size / 2,
-        y - size / 2,
-        size as u32,
-        size as u32,
-    );
-
-    canvas.fill_rect(rect)
+    for dx in -(radius-1)..radius {
+        for dy in -(radius-1)..radius {
+            if dx * dx + dy * dy <= radius * radius {
+                canvas.draw_point((x + dx, y + dy))?;
+            }
+        }
+    }
+    Ok(())
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -36,7 +35,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut canvas = window.into_canvas();
     let mut event_pump = sdl_context.event_pump()?;
 
-    let mut vertex = Vertex::new(400.0, 300.0);
+    let mut vertex = Vertex::new(400.0, 300.0,0.0);
 
     'running: loop {
         // -------- EVENTS --------
@@ -48,26 +47,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     ..
                 } => break 'running,
 
-                Event::KeyDown {
-                    keycode: Some(Keycode::W),
-                    ..
-                } => vertex = vertex.translate(0.0, -10.0),
-
-                Event::KeyDown {
-                    keycode: Some(Keycode::S),
-                    ..
-                } => vertex = vertex.translate(0.0, 10.0),
-
-                Event::KeyDown {
-                    keycode: Some(Keycode::A),
-                    ..
-                } => vertex = vertex.translate(-10.0, 0.0),
-
-                Event::KeyDown {
-                    keycode: Some(Keycode::D),
-                    ..
-                } => vertex = vertex.translate(10.0, 0.0),
-
                 _ => {}
             }
         }
@@ -78,7 +57,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         canvas.set_draw_color(Color::RGB(255, 255, 255));
 
-        draw_vertex(&mut canvas, vertex, 10)?;
+        draw_vertex(&mut canvas, vertex, 5)?;
 
         canvas.present();
     }
