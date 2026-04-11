@@ -37,25 +37,44 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let radius = 4;
     let mut rotation_angle: f32 = 0.0;
-    //  projection matrix (3x3, drops Z)
+
+    // Projection matrix (3x3, drops Z)
     let projection_matrix = vec![
         vec![1.0, 0.0, 0.0],
         vec![0.0, 1.0, 0.0],
         vec![0.0, 0.0, 0.0],
     ];
 
-    let (x, y, offset) = (
+    let (x, y, offset, z) = (
         width as f32 / 2.5,
         height as f32 / 2.5,
         width as f32 / 7.0,
+        0.0,
     );
 
+    // 8 vertices of the cube
     let vertices: Vec<Vertex> = vec![
-        Vertex::new(x,          y,          0.0),
-        Vertex::new(x,          y + offset, 0.0),
-        Vertex::new(x + offset, y,          0.0),
-        Vertex::new(x + offset, y + offset, 0.0),
+        Vertex::new(x,            y,            z),            
+        Vertex::new(x,            y + offset,   z),            
+        Vertex::new(x + offset,   y,            z),            
+        Vertex::new(x + offset,   y + offset,   z),            
+        Vertex::new(x,            y,            z + offset),   
+        Vertex::new(x,            y + offset,   z + offset),   
+        Vertex::new(x + offset,   y,            z + offset),   
+        Vertex::new(x + offset,   y + offset,   z + offset),   
     ];
+
+    // 12 edges of a cube as pairs of vertex indices
+    let edges: [(usize, usize); 12] = [
+        (0, 1), (0, 2), (1, 3), (2, 3),
+        (4, 5), (4, 6), (5, 7), (6, 7),
+        (0, 4), (1, 5), (2, 6), (3, 7),
+    ];
+
+    // Compute center of the cube (stays constant, do it once)
+    let cx = vertices.iter().map(|v| v.x).sum::<f32>() / vertices.len() as f32;
+    let cy = vertices.iter().map(|v| v.y).sum::<f32>() / vertices.len() as f32;
+    let cz = vertices.iter().map(|v| v.z).sum::<f32>() / vertices.len() as f32;
 
     'running: loop {
         // -------- EVENTS --------
@@ -69,44 +88,53 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 _ => {}
             }
         }
+
         // -------- RENDER --------
         canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
         canvas.set_draw_color(Color::RGB(255, 255, 255));
- // Combine rotation matrices: Rz * Ry * Rx
-            let rotation_matrix = multiply_matrix(
-                &multiply_matrix(
-                    &get_rotation_matrix(rotation_angle, Axis::Z),
-                    &get_rotation_matrix(rotation_angle, Axis::Y),
-                ),
-                &get_rotation_matrix(rotation_angle, Axis::X),
-            );
-    // Compute center of the shape
-let cx = vertices.iter().map(|v| v.x).sum::<f32>() / vertices.len() as f32;
-let cy = vertices.iter().map(|v| v.y).sum::<f32>() / vertices.len() as f32;
-let cz = vertices.iter().map(|v| v.z).sum::<f32>() / vertices.len() as f32;
 
-for vertex in &vertices {
-    let vertex_col: Vec<Vec<f32>> = vec![
-        vec![vertex.x - cx],
-        vec![vertex.y - cy],
-        vec![vertex.z - cz],
-    ];
+        // Combine rotation matrices: Rz * Ry * Rx
+        let rotation_matrix = multiply_matrix(
+            &multiply_matrix(
+                &get_rotation_matrix(rotation_angle, Axis::Z),
+                &get_rotation_matrix(rotation_angle, Axis::Y),
+            ),
+            &get_rotation_matrix(rotation_angle, Axis::X),
+        );
 
-    let rotated = multiply_matrix(&rotation_matrix, &vertex_col);
+        // Project all vertices first
+        let projected_verts: Vec<(f32, f32)> = vertices
+            .iter()
+            .map(|vertex| {
+                let vertex_col = vec![
+                    vec![vertex.x - cx],
+                    vec![vertex.y - cy],
+                    vec![vertex.z - cz],
+                ];
+                let rotated = multiply_matrix(&rotation_matrix, &vertex_col);
+                let projected = multiply_matrix(&projection_matrix, &rotated);
+                (projected[0][0] + cx, projected[1][0] + cy)
+            })
+            .collect();
 
-    let projected = multiply_matrix(&projection_matrix, &rotated);
+        // Draw edges
+        for (a, b) in &edges {
+            let (x1, y1) = projected_verts[*a];
+            let (x2, y2) = projected_verts[*b];
+            canvas.draw_line(
+                (x1 as i32, y1 as i32),
+                (x2 as i32, y2 as i32),
+            )?;
+        }
 
-    draw_vertex(
-        &mut canvas,
-        projected[0][0] + cx,
-        projected[1][0] + cy,
-        radius,
-    )?;
-}
+        // Draw vertex dots on top of edges
+        for (vx, vy) in &projected_verts {
+            draw_vertex(&mut canvas, *vx, *vy, radius)?;
+        }
 
         canvas.present();
-        rotation_angle += 0.0002;
+        rotation_angle += 0.0005;
     }
 
     Ok(())
