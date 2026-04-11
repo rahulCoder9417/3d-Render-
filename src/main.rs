@@ -35,7 +35,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut canvas = window.into_canvas();
     let mut event_pump = sdl_context.event_pump()?;
 
-    let mut vertex = Vertex::new(400.0, 300.0,0.0);
+    let mut Vertexs: Vec<Vertex> = vec![];
 
     'running: loop {
         // -------- EVENTS --------
@@ -54,10 +54,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // -------- RENDER --------
         canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
-
+        let (x,y,offset) = (350.0,200.0,130.0);
         canvas.set_draw_color(Color::RGB(255, 255, 255));
+        Vertexs.push(Vertex::new(x, y, 0.0));
+        Vertexs.push(Vertex::new(x, y + offset, 0.0));
+        Vertexs.push(Vertex::new(x + offset, y, 0.0));
+        Vertexs.push(Vertex::new(x + offset, y + offset, 0.0));
 
-        draw_vertex(&mut canvas, vertex, 5)?;
+        for vertex in &Vertexs {
+            draw_vertex(&mut canvas, *vertex, 4)?;
+        }
 
         canvas.present();
     }
