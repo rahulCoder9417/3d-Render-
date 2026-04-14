@@ -1,7 +1,7 @@
 use sdl3::event::Event;
 use sdl3::keyboard::Keycode;
 
-use render_from_scratch::{Cube, Renderer};
+use render_from_scratch::{Cube, Sphere, Renderer, Vertex};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let sdl_context = sdl3::init()?;
@@ -16,11 +16,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut canvas = window.into_canvas();
     let mut event_pump = sdl_context.event_pump()?;
 
-    // Build the cube
     let size = width as f32 / 7.0;
     let ox = width as f32 / 2.5;
     let oy = height as f32 / 2.5;
     let mut cube = Cube::new(ox, oy, 0.0, size);
+
+    // Place sphere to the left of the cube
+    let sphere_center = Vertex::new(ox - size * 2.0, oy + size / 2.0, 0.0);
+    let mut sphere = Sphere::new(sphere_center, size / 2.0, 10, 16);
 
     let renderer = Renderer::new(4);
 
@@ -34,7 +37,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         cube.tick(0.0005);
-        renderer.draw_frame(&mut canvas, &cube)?;
+        sphere.tick(0.0005);
+        renderer.draw_frame(&mut canvas, &cube, &sphere)?;
     }
 
     Ok(())
