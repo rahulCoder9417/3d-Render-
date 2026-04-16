@@ -15,22 +15,24 @@ pub struct Cube {
 
 impl Cube {
     /// Build a cube from an origin corner (ox, oy, oz) and a side size.
-    pub fn new(ox: f32, oy: f32, oz: f32, size: f32) -> Self {
+    pub fn new(ox: f32, oy: f32, oz: f32, size: f32 , depth: (f32, f32, f32)) -> Self {
+    let (x_depth, y_depth, z_depth) = depth;
         let s = size;
         let vertices = [
-            Vertex::new(ox,     oy,     oz    ),
-            Vertex::new(ox,     oy + s, oz    ),
-            Vertex::new(ox + s, oy,     oz    ),
-            Vertex::new(ox + s, oy + s, oz    ),
-            Vertex::new(ox,     oy,     oz + s),
-            Vertex::new(ox,     oy + s, oz + s),
-            Vertex::new(ox + s, oy,     oz + s),
-            Vertex::new(ox + s, oy + s, oz + s),
+            Vertex::new(ox              , oy               ,oz               ),
+            Vertex::new(ox              , oy + s + y_depth, oz             ),
+            Vertex::new(ox + s + x_depth, oy              , oz              ),
+            Vertex::new(ox + s + x_depth, oy + s + y_depth, oz              ),
+            Vertex::new(ox              , oy              , oz + s + z_depth),
+            Vertex::new(ox              , oy + s + y_depth, oz + s + z_depth),
+            Vertex::new(ox + s + x_depth, oy              , oz + s + z_depth),
+            Vertex::new(ox + s + x_depth, oy + s + y_depth, oz + s + z_depth),
         ];
 
         let center = Self::compute_center(&vertices);
         Self { vertices, center, rotation_angle: 0.0 }
     }
+
 
     //change after tick
     pub fn tick(&mut self, delta: f32) {
