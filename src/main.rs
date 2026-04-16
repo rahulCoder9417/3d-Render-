@@ -1,6 +1,6 @@
 use sdl3::event::Event;
 use sdl3::keyboard::Keycode;
-
+use std::time::Instant;
 use render_from_scratch::{Cube, Sphere, Renderer, Vertex};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -23,23 +23,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Place sphere to the left of the cube
     let sphere_center = Vertex::new(ox - size * 2.0, oy + size / 2.0, 0.0);
-    let mut sphere = Sphere::new(sphere_center, size / 2.0, 10, 16);
+    let mut sphere = Sphere::new(sphere_center, size / 2.0, 6, 10);
 
     let renderer = Renderer::new(4);
+let mut last_time = Instant::now();
 
-    'running: loop {
-        for event in event_pump.poll_iter() {
-            match event {
-                Event::Quit { .. }
-                | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => break 'running,
-                _ => {}
-            }
-        }
+'running: loop {
+    let now = Instant::now();
+    let dt = now.duration_since(last_time).as_secs_f32();
+    last_time = now;
 
-        cube.tick(0.0005);
-        sphere.tick(0.0005);
-        renderer.draw_frame(&mut canvas, &cube, &sphere)?;
-    }
+    let speed = 1.5;
+
+    cube.tick(speed * dt);
+    sphere.tick(speed * dt);
+
+    renderer.draw_frame(&mut canvas, &cube, &sphere)?;
+}
 
     Ok(())
 }
