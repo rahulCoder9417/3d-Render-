@@ -23,22 +23,26 @@ impl Renderer {
     pub fn draw_frame(
         &self,
         canvas: &mut Canvas<Window>,
-        cube: &Cube,
-        sphere: &Sphere,
+        vec_cube: &Vec<Cube>,
+        vec_sphere: &Vec<Sphere>,
     ) -> Result<(), sdl3::Error> {
         canvas.set_draw_color(self.bg_color);
         canvas.clear();
 
         // Draw cube in white
         canvas.set_draw_color(Color::RGB(255, 255, 255));
-        let cube_verts = cube.projected_vertices();
-        self.draw_edges(canvas, &cube_verts, cube.edges())?;
-        self.draw_dots(canvas, &cube_verts)?;
+        for cube in vec_cube {
+            let cube_verts = cube.projected_vertices();
+            self.draw_edges(canvas, &cube_verts, cube.edges())?;
+            self.draw_dots(canvas, &cube_verts)?;
+        }
 
         // Draw sphere in a different color so they're visually distinct
         canvas.set_draw_color(Color::RGB(100, 200, 255));
-        let sphere_verts = sphere.projected_vertices();
-        self.draw_edges(canvas, &sphere_verts, &sphere.edges)?;
+        for sphere in vec_sphere {
+            let sphere_verts = sphere.projected_vertices();
+            self.draw_edges(canvas, &sphere_verts, &sphere.edges)?;
+        }
 
         canvas.present();
         Ok(())

@@ -18,11 +18,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let size = width as f32 / 7.0;
     let ox = width as f32 / 2.5;
-    let oy = height as f32 / 2.5;
-    let mut cube = Cube::new(ox, oy, 0.0, size, (114.0, 48.0, 45.0));
+    let oy = height as f32 / 3.5;
+    let mut vec_cube = vec![Cube::new(ox, oy, 0.0, size, (24.0, 118.0, 45.0)),
+                             Cube::new(ox, oy, 50.0, size, (0.0, 0.0, 0.0)),  ];
     // Place sphere to the left of the cube
-    let sphere_center = Vertex::new(ox - size * 2.0, oy + size / 2.0, 0.0);
-    let mut sphere = Sphere::new(sphere_center, size / 2.0, 6, 10);
+    let sphere_center = Vertex::new(ox+10.0 , oy+228.0, 0.0);
+    let mut vec_sphere = vec![Sphere::new(sphere_center, size / 2.0, 6, 10)];
 
     let renderer = Renderer::new(4);
 let mut last_time = Instant::now();
@@ -39,11 +40,14 @@ let mut last_time = Instant::now();
         }
     }
     let speed = 1.5;
+    for cube in &mut vec_cube {
+        cube.tick(speed * dt);
+    }
+    for sphere in &mut vec_sphere {
+        sphere.tick(speed * dt);
+    }
 
-    cube.tick(speed * dt);
-    sphere.tick(speed * dt);
-
-    renderer.draw_frame(&mut canvas, &cube, &sphere)?;
+    renderer.draw_frame(&mut canvas, &vec_cube, &vec_sphere)?;
 }
 
     Ok(())
