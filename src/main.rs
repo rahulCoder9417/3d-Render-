@@ -19,11 +19,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let size = width as f32 / 7.0;
     let ox = width as f32 / 2.5;
     let oy = height as f32 / 3.5;
-    let mut vec_cube = vec![Cube::new(ox, oy, 0.0, size, (24.0, 118.0, 45.0)),
-                             Cube::new(ox, oy, 50.0, size, (0.0, 0.0, 0.0)),  ];
-    // Place sphere to the left of the cube
-    let sphere_center = Vertex::new(ox+10.0 , oy+228.0, 0.0);
-    let mut vec_sphere = vec![Sphere::new(sphere_center, size / 2.0, 6, 10)];
+
+let mut vec_cube = vec![
+    Cube::new(ox, oy, 0.0, size, (0.0, 0.0, 0.0)),
+    Cube::new(ox,  oy + size, 0.0, size, (0.0, 100.0, 0.0))
+];
+    let mut vec_sphere = vec![Sphere::new(Vertex::new(ox+10.0 , oy+228.0, 0.0);, size / 2.0, 6, 10)];
 
     let renderer = Renderer::new(4);
 let mut last_time = Instant::now();
@@ -36,6 +37,7 @@ let mut last_time = Instant::now();
         match event {
             Event::Quit { .. }
             | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => break 'running,
+            
             _ => {}
         }
     }
