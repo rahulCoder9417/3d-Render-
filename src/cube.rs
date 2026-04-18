@@ -51,6 +51,7 @@ impl Cube {
             // Translate to origin, rotate, project, translate back
             let local = v.translate(-cx, -cy, -cz);
             let rotated = local.transform(&rot);
+            
             let projected = rotated.transform(&PROJECTION);
             out[i] = (projected.x + cx, projected.y + cy);
         }
