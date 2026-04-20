@@ -29,6 +29,8 @@ let mut vec_cube = vec![
     let renderer = Renderer::new(4);
     let mut last_time = Instant::now();
     let mut input = InputState::new();
+    let mut camera = Camera::new();
+
     'running: loop {
         let now = Instant::now();
         let dt = now.duration_since(last_time).as_secs_f32();
@@ -36,20 +38,21 @@ let mut vec_cube = vec![
         for event in event_pump.poll_iter() {
             input.handle_event(event);
         }
-
+        
         if input.quit {
             break 'running;
         }
-    let speed = 1.5;
-    for cube in &mut vec_cube {
-        cube.tick(speed * dt);
-    }
-    for sphere in &mut vec_sphere {
-        sphere.tick(speed * dt);
-    }
+        camera.update(dt);
+        let speed = 1.5;
+        for cube in &mut vec_cube {
+            cube.tick(speed * dt);
+        }
+        for sphere in &mut vec_sphere {
+            sphere.tick(speed * dt);
+        }
 
-    renderer.draw_frame(&mut canvas, &vec_cube, &vec_sphere)?;
-}
+        renderer.draw_frame(&mut canvas, &vec_cube, &vec_sphere)?;
+    }
 
     Ok(())
 }
