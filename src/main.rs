@@ -1,7 +1,7 @@
 use sdl3::event::Event;
 use sdl3::keyboard::Keycode;
 use std::time::Instant;
-use render_from_scratch::{Cube, Sphere, Renderer, Vertex,InputState};
+use render_from_scratch::{Cube, Sphere, Renderer, Vertex,InputState,Camera};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let sdl_context = sdl3::init()?;
