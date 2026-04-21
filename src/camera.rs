@@ -22,18 +22,12 @@ impl Camera {
         }
     }
     
-    pub fn update(&mut self, dt: f32) {
-       if InputState::w {
-           self.z += self.move_speed * dt;
-       }
-       if InputState::s {
-           self.z -= self.move_speed * dt;
-       }
-       if InputState::a {
-           self.x -= self.move_speed * dt;
-       }
-       if InputState::d {
-           self.x += self.move_speed * dt;
-       }
+    pub fn update(&mut self,input:&InputState, dt: f32) {
+       if input.w { self.z += self.move_speed * dt; }
+        if input.s { self.z -= self.move_speed * dt; }
+        if input.a { self.x -= self.move_speed * dt; }
+        if input.d { self.x += self.move_speed * dt; }
+        if input.left  { self.yaw -= 1.5 * dt; }
+        if input.right { self.yaw += 1.5 * dt; }
     }
 }

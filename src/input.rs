@@ -7,6 +7,8 @@ pub struct InputState {
     pub a: bool,
     pub s: bool,
     pub d: bool,
+    pub left:bool,
+    pub right:bool,
 }
 
 impl InputState {
@@ -17,6 +19,8 @@ impl InputState {
             a: false,
             s: false,
             d: false,
+            left: false,
+            right: false,
         }
     }
 
@@ -31,6 +35,8 @@ impl InputState {
                     Keycode::A => self.a = true,
                     Keycode::S => self.s = true,
                     Keycode::D => self.d = true,
+                    Keycode::Left => self.left = true,
+                    Keycode::Right => self.right = true,
                     _ => {}
                 }
             }
@@ -41,6 +47,8 @@ impl InputState {
                     Keycode::A => self.a = false,
                     Keycode::S => self.s = false,
                     Keycode::D => self.d = false,
+                    Keycode::Left => self.left = false,
+                    Keycode::Right => self.right = false,
                     _ => {}
                 }
             }
