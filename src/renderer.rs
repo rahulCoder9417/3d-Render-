@@ -2,13 +2,15 @@ use sdl3::pixels::Color;
 use sdl3::render::Canvas;
 use sdl3::video::Window;
 
-use crate::cube::Cube;
-use crate::sphere::Sphere;
+use crate::camera::Camera;
+use crate::math::Vertex;
+use crate::shapes::{Cube, Sphere};
 
 pub struct Renderer {
     dot_radius: i32,
     bg_color: Color,
-    fg_color: Color,
+    cube_color: Color,
+    sphere_color: Color,
 }
 
 impl Renderer {
@@ -16,48 +18,58 @@ impl Renderer {
         Self {
             dot_radius,
             bg_color: Color::RGB(0, 0, 0),
-            fg_color: Color::RGB(255, 255, 255),
+            cube_color: Color::RGB(255, 255, 255),
+            sphere_color: Color::RGB(100, 200, 255),
         }
     }
 
     pub fn draw_frame(
         &self,
         canvas: &mut Canvas<Window>,
-        vec_cube: &Vec<Cube>,
-        vec_sphere: &Vec<Sphere>,
+        camera: &Camera,
+        screen: (f32, f32),
+        cubes: &[Cube],
+        spheres: &[Sphere],
     ) -> Result<(), sdl3::Error> {
         canvas.set_draw_color(self.bg_color);
         canvas.clear();
 
-        // Draw cube in white
-        canvas.set_draw_color(Color::RGB(255, 255, 255));
-        for cube in vec_cube {
-            let cube_verts = cube.projected_vertices();
-            self.draw_edges(canvas, &cube_verts, cube.edges())?;
-            self.draw_dots(canvas, &cube_verts)?;
+        canvas.set_draw_color(self.cube_color);
+        for cube in cubes {
+            let verts = self.project_all(camera, screen, &cube.world_vertices());
+            self.draw_edges(canvas, &verts, cube.edges())?;
+            self.draw_dots(canvas, &verts)?;
         }
 
-        // Draw sphere in a different color so they're visually distinct
-        canvas.set_draw_color(Color::RGB(100, 200, 255));
-        for sphere in vec_sphere {
-            let sphere_verts = sphere.projected_vertices();
-            self.draw_edges(canvas, &sphere_verts, &sphere.edges)?;
+        canvas.set_draw_color(self.sphere_color);
+        for sphere in spheres {
+            let verts = self.project_all(camera, screen, &sphere.world_vertices());
+            self.draw_edges(canvas, &verts, sphere.edges())?;
         }
 
         canvas.present();
         Ok(())
     }
 
+    fn project_all(
+        &self,
+        camera: &Camera,
+        screen: (f32, f32),
+        verts: &[Vertex],
+    ) -> Vec<Option<(f32, f32)>> {
+        verts.iter().map(|v| camera.project(*v, screen.0, screen.1)).collect()
+    }
+
     fn draw_edges(
         &self,
         canvas: &mut Canvas<Window>,
-        verts: &[(f32, f32)],
+        verts: &[Option<(f32, f32)>],
         edges: &[(usize, usize)],
     ) -> Result<(), sdl3::Error> {
         for &(a, b) in edges {
-            let (x1, y1) = verts[a];
-            let (x2, y2) = verts[b];
-            canvas.draw_line((x1 as i32, y1 as i32), (x2 as i32, y2 as i32))?;
+            if let (Some((x1, y1)), Some((x2, y2))) = (verts[a], verts[b]) {
+                canvas.draw_line((x1 as i32, y1 as i32), (x2 as i32, y2 as i32))?;
+            }
         }
         Ok(())
     }
@@ -65,10 +77,10 @@ impl Renderer {
     fn draw_dots(
         &self,
         canvas: &mut Canvas<Window>,
-        verts: &[(f32, f32)],
+        verts: &[Option<(f32, f32)>],
     ) -> Result<(), sdl3::Error> {
-        for &(vx, vy) in verts {
-            self.draw_dot(canvas, vx, vy)?;
+        for v in verts.iter().flatten() {
+            self.draw_dot(canvas, v.0, v.1)?;
         }
         Ok(())
     }

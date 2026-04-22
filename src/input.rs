@@ -7,8 +7,12 @@ pub struct InputState {
     pub a: bool,
     pub s: bool,
     pub d: bool,
-    pub left:bool,
-    pub right:bool,
+    pub left: bool,
+    pub right: bool,
+    pub up: bool,         // move camera up (Space)
+    pub down: bool,       // move camera down (LShift)
+    pub pitch_up: bool,   // tilt view up (Up arrow)
+    pub pitch_down: bool, // tilt view down (Down arrow)
 }
 
 impl InputState {
@@ -21,6 +25,10 @@ impl InputState {
             d: false,
             left: false,
             right: false,
+            up: false,
+            down: false,
+            pitch_up: false,
+            pitch_down: false,
         }
     }
 
@@ -37,6 +45,10 @@ impl InputState {
                     Keycode::D => self.d = true,
                     Keycode::Left => self.left = true,
                     Keycode::Right => self.right = true,
+                    Keycode::Space => self.up = true,
+                    Keycode::LShift => self.down = true,
+                    Keycode::Up => self.pitch_up = true,
+                    Keycode::Down => self.pitch_down = true,
                     _ => {}
                 }
             }
@@ -49,6 +61,10 @@ impl InputState {
                     Keycode::D => self.d = false,
                     Keycode::Left => self.left = false,
                     Keycode::Right => self.right = false,
+                    Keycode::Space => self.up = false,
+                    Keycode::LShift => self.down = false,
+                    Keycode::Up => self.pitch_up = false,
+                    Keycode::Down => self.pitch_down = false,
                     _ => {}
                 }
             }

@@ -21,6 +21,7 @@ pub fn mat3_mul_col(m: &Mat3, v: &Col3) -> Col3 {
     ]
 }
 
+
 pub fn rotation_x(a: f32) -> Mat3 {
     let (s, c) = (a.sin(), a.cos());
     [[1.0, 0.0, 0.0],
@@ -49,10 +50,3 @@ pub fn rotation_xyz(angle: f32) -> Mat3 {
         &rotation_x(angle),
     )
 }
-
-// Projection matrix
-pub const PROJECTION: Mat3 = [
-    [1.0, 0.0, 0.0],
-    [0.0, 1.0, 0.0],
-    [0.0, 0.0, 0.0],
-];

@@ -1,25 +1,22 @@
-use crate::math::{rotation_xyz, PROJECTION};
-use crate::vertex::Vertex;
+use crate::math::{rotation_xyz, Vertex};
 
 pub struct Sphere {
     center: Vertex,
-    radius: f32,
     pub rotation_angle: f32,
     vertices: Vec<Vertex>,
-    pub edges: Vec<(usize, usize)>,
+    edges: Vec<(usize, usize)>,
 }
 
 impl Sphere {
-    //stack-horizontal rings, slices = vertical segments
+    // stacks = horizontal rings, slices = vertical segments
     pub fn new(center: Vertex, radius: f32, stacks: usize, slices: usize) -> Self {
-        let mut vertices = Vec::new();
+        let mut vertices = Vec::with_capacity((stacks + 1) * slices);
         let mut edges = Vec::new();
 
-        // Generate vertices using spherical coordinates
         for stack in 0..=stacks {
-            let phi = std::f32::consts::PI * stack as f32 / stacks as f32; // 0 to PI
+            let phi = std::f32::consts::PI * stack as f32 / stacks as f32;
             for slice in 0..slices {
-                let theta = 2.0 * std::f32::consts::PI * slice as f32 / slices as f32; // 0 to 2PI
+                let theta = 2.0 * std::f32::consts::PI * slice as f32 / slices as f32;
                 let x = center.x + radius * phi.sin() * theta.cos();
                 let y = center.y + radius * phi.sin() * theta.sin();
                 let z = center.z + radius * phi.cos();
@@ -27,7 +24,6 @@ impl Sphere {
             }
         }
 
-        // Horizontal ring edges
         for stack in 0..=stacks {
             for slice in 0..slices {
                 let current = stack * slices + slice;
@@ -36,7 +32,6 @@ impl Sphere {
             }
         }
 
-        // Vertical column edges
         for stack in 0..stacks {
             for slice in 0..slices {
                 let current = stack * slices + slice;
@@ -45,24 +40,25 @@ impl Sphere {
             }
         }
 
-        Self { center, radius, rotation_angle: 0.0, vertices, edges }
+        Self { center, rotation_angle: 0.0, vertices, edges }
     }
 
     pub fn tick(&mut self, delta: f32) {
         self.rotation_angle += delta;
     }
 
-    pub fn projected_vertices(&self) -> Vec<(f32, f32)> {
+    pub fn world_vertices(&self) -> Vec<Vertex> {
         let rot = rotation_xyz(self.rotation_angle);
-        let cx = self.center.x;
-        let cy = self.center.y;
-        let cz = self.center.z;
+        let (cx, cy, cz) = (self.center.x, self.center.y, self.center.z);
 
         self.vertices.iter().map(|v| {
             let local = v.translate(-cx, -cy, -cz);
             let rotated = local.transform(&rot);
-            let projected = rotated.transform(&PROJECTION);
-            (projected.x + cx, projected.y + cy)
+            rotated.translate(cx, cy, cz)
         }).collect()
+    }
+
+    pub fn edges(&self) -> &[(usize, usize)] {
+        &self.edges
     }
 }

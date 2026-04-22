@@ -1,4 +1,4 @@
-use crate::math::{Col3, Mat3, mat3_mul_col};
+use super::matrix::{Col3, Mat3, mat3_mul_col};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Vertex {
